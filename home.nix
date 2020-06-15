@@ -30,12 +30,29 @@
     enable = true;
     userName = "Jordan Huizenga";
     userEmail = "jhuizenga99@gmail.com";
+    aliases = {
+      st = "status";
+      pu = "push";
+      cm = "commit -m";
+      ca = "commit --amend";
+      ds = "diff --staged";
+      di = "diff";
+    };
   };
 
   programs.zsh = {
     enable = true;
     enableAutosuggestions = true;
     enableCompletion = true;
+    shellAliases = {
+      assume-role-shell = "function(){eval $(command assume-role $@);}";
+      mux = "tmuxinator";
+      tma = "tmux attach -d -t";
+      tmn = "tmux new-sesion";
+      git-tmux = "tmux new -s $(basename $(pwd))";
+      gi = "function gi() { curl -sLw \"\n\" https://www.gitignore.io/api/$@ ;}";
+      gp = "git push";
+    };
     plugins = [
       {
         name = "zsh-fast-syntax-highlighting";
@@ -59,8 +76,42 @@
         "docker"
         "aws"
         "cabal"
+        "tmux"
       ];
     };
+  };
+
+  programs.tmux = {
+    enable = true;
+    keyMode = "vi";
+    extraConfig = ''
+      set -g default-terminal "screen-256color"
+      bind h select-pane -L
+      bind j select-pane -D
+      bind k select-pane -U
+      bind l select-pane -R
+      bind | split-window -h -c "#{pane_current_path}"
+      bind - split-window -v -c "#{pane_current_path}"
+
+      # Smart pane switching with awareness of Vim splits.
+      # See: https://github.com/christoomey/vim-tmux-navigator
+      is_vim="ps -o state= -o comm= -t '#{pane_tty}' \
+          | grep -iqE '^[^TXZ ]+ +(\\S+\\/)?g?(view|n?vim?x?)(diff)?$'"
+      bind-key -n C-h if-shell "$is_vim" "send-keys C-h"  "select-pane -L"
+      bind-key -n C-j if-shell "$is_vim" "send-keys C-j"  "select-pane -D"
+      bind-key -n C-k if-shell "$is_vim" "send-keys C-k"  "select-pane -U"
+      bind-key -n C-l if-shell "$is_vim" "send-keys C-l"  "select-pane -R"
+      bind-key -T copy-mode-vi C-h select-pane -L
+      bind-key -T copy-mode-vi C-j select-pane -D
+      bind-key -T copy-mode-vi C-k select-pane -U
+      bind-key -T copy-mode-vi C-l select-pane -R
+
+      bind-key -n C-_ resize-pane -D 10
+      bind-key -n C-= resize-pane -U 10
+
+      # Allows me to use mouse
+      set -g mouse on
+    '';
   };
 
   programs.vim = {
