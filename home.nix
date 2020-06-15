@@ -19,24 +19,33 @@
   # changes in each release.
   home.stateVersion = "20.09";
 
+  home.packages = with pkgs; [
+    cachix
+    git
+    gitAndTools.gh
+    nixpkgs-fmt
+  ];
+
+
   programs.zsh = {
     enable = true;
     enableAutosuggestions = true;
     enableCompletion = true;
 
-  }
+  };
+
 
   programs.vim = {
     enable = true;
-    plugins = [
-      "vim-autoformat"
-      "vim-airline"
-      "vim-airline-themes"
-      "nerdtree"
-      "fzf-vim"
-      "vim-commentary"
-      "vim-surround"
-      "vim-snipmate"
+    plugins = with pkgs.vimPlugins; [
+      vim-autoformat
+      vim-airline
+      vim-airline-themes
+      nerdtree
+      fzf-vim
+      vim-commentary
+      vim-surround
+      vim-snipmate
     ];
     settings = { ignorecase = true; };
     extraConfig = ''
