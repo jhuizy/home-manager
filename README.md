@@ -29,3 +29,10 @@ ln -s $PWD ~/.config/nixpkgs
 home-manager switch
 ```
 
+# Everyday usage
+
+## Adding a NPM package
+
+1. Add the package name to [node/node-packages.json](./node/node-packages.json)
+2. Regenerate relevant `nix` files `cd node && nix-shell -p nodePackages.node2nix --command "node2nix -i ./node-packages.json -o node-packages.nix"`
+3. Add reference to the new package in `home.nix` (eg. `home.packages = [ extraNodePackages.<package name> ];`)

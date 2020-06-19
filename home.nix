@@ -13,7 +13,7 @@ let
       ln -s $out/bin/main $out/bin/assume-role
     '';
   };
-  extraNodePackages = import ./node/default.nix {};
+  extraNodePackages = import ./node/default.nix { };
 
 in
 {
@@ -83,39 +83,17 @@ in
       gp = "git push";
     };
     initExtra = ''
-      bindkey -v
       bindkey '^R' history-incremental-search-backward
+      bindkey "^[[1;5C" forward-word
+      bindkey "^[[1;5D" backward-word
 
-      export XDG_RUNTIME_DIR="$HOME/.run";
-      export XDG_CACHE_DIR="$HOME/.cache";
+      source ${pkgs.zsh-fast-syntax-highlighting}/share/zsh/site-functions/fast-syntax-highlighting.plugin.zsh
+
     '';
     plugins = [
       {
         name = "zsh-fast-syntax-highlighting";
-        src = pkgs.fetchFromGitHub {
-          owner = "zdharma";
-          repo = "fast-syntax-highlighting";
-          rev = "v1.55";
-          sha256 = "0h7f27gz586xxw7cc0wyiv3bx0x3qih2wwh05ad85bh2h834ar8d";
-        };
-      }
-      {
-        name = "zsh-autosuggestions";
-        src = pkgs.fetchFromGitHub {
-          owner = "zsh-users";
-          repo = "zsh-autosuggestions";
-          rev = "v0.4.0";
-          sha256 = "0z6i9wjjklb4lvr7zjhbphibsyx51psv50gm07mbb0kj9058j6kc";
-        };
-      }
-      {
-        name = "zsh-completions";
-        src = pkgs.fetchFromGitHub {
-          owner = "zsh-users";
-          repo = "zsh-completions";
-          rev = " 0.31.0";
-          sha256 = "0rw23m8cqxhcb4yjhbzb9lir60zn1xjy7hn3zv1fzz700f0i6fyk";
-        };
+        src = "${pkgs.zsh-fast-syntax-highlighting}/share/zsh/site-functions";
       }
     ];
     oh-my-zsh = {
