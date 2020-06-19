@@ -1,5 +1,21 @@
 { config, pkgs, ... }:
+let
+  assume-role = pkgs.buildGoPackage rec {
+    name = "assume-role";
+    goPackagePath = "main";
+    src = pkgs.fetchFromGitHub {
+      owner = "remind101";
+      repo = "assume-role";
+      rev = "06a34b06d24a610291bb0952f2a24341e67a9b6e";
+      sha256 = "1yd4c8d09sgrz5bqxpqxl9xhgar92rd54yxqlx48qyvl381nkzrr";
+    };
+    postInstall = ''
+      ln -s $out/bin/main $out/bin/assume-role
+    '';
+  };
+  extraNodePackages = import ./node/default.nix {};
 
+in
 {
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
@@ -7,7 +23,7 @@
   # Home Manager needs a bit of information about you and the
   # paths it should manage.
   home.username = "jordan";
-  home.homeDirectory = "/home/jordan";
+  home.homeDirectory = if pkgs.stdenv.hostPlatform.isDarwin then "/Users/jordan" else "/home/jordan";
 
   # This value determines the Home Manager release that your
   # configuration is compatible with. This helps avoid breakage
@@ -21,10 +37,23 @@
 
   home.packages = with pkgs; [
     cachix
-    gitAndTools.gh
     nixpkgs-fmt
-    libGL
+    awscli
+    jq
+    coreutils
+    git
+
+    nodejs
+    go
+    gitAndTools.gh
+    assume-role
+    extraNodePackages.aws-azure-login
   ];
+
+  home.sessionVariables = {
+    XDG_RUNTIME_DIR = "$HOME/.run";
+    XDG_CACHE_DIR = "$HOME/.cache";
+  };
 
   programs.git = {
     enable = true;
@@ -53,10 +82,22 @@
       gi = "function gi() { curl -sLw \"\n\" https://www.gitignore.io/api/$@ ;}";
       gp = "git push";
     };
+    initExtra = ''
+      bindkey -v
+      bindkey '^R' history-incremental-search-backward
+
+      export XDG_RUNTIME_DIR="$HOME/.run";
+      export XDG_CACHE_DIR="$HOME/.cache";
+    '';
     plugins = [
       {
         name = "zsh-fast-syntax-highlighting";
-        src = "${pkgs.zsh-fast-syntax-highlighting}/share/zsh/site-functions";
+        src = pkgs.fetchFromGitHub {
+          owner = "zdharma";
+          repo = "fast-syntax-highlighting";
+          rev = "v1.55";
+          sha256 = "0h7f27gz586xxw7cc0wyiv3bx0x3qih2wwh05ad85bh2h834ar8d";
+        };
       }
       {
         name = "zsh-autosuggestions";
@@ -65,6 +106,15 @@
           repo = "zsh-autosuggestions";
           rev = "v0.4.0";
           sha256 = "0z6i9wjjklb4lvr7zjhbphibsyx51psv50gm07mbb0kj9058j6kc";
+        };
+      }
+      {
+        name = "zsh-completions";
+        src = pkgs.fetchFromGitHub {
+          owner = "zsh-users";
+          repo = "zsh-completions";
+          rev = " 0.31.0";
+          sha256 = "0rw23m8cqxhcb4yjhbzb9lir60zn1xjy7hn3zv1fzz700f0i6fyk";
         };
       }
     ];
@@ -76,7 +126,6 @@
         "docker"
         "aws"
         "cabal"
-        "tmux"
       ];
     };
   };
@@ -84,6 +133,11 @@
   programs.tmux = {
     enable = true;
     keyMode = "vi";
+
+    # Work-around for a lack of XDG_RUNTIME_DIR 
+    # See https://github.com/rycee/home-manager/issues/1270
+    secureSocket = pkgs.stdenv.hostPlatform.isLinux;
+
     extraConfig = ''
       set -g default-terminal "screen-256color"
       bind h select-pane -L
