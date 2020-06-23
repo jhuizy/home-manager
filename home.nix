@@ -1,5 +1,7 @@
-{ config, pkgs, ... }:
 let
+  sources = import ./nix/sources.nix;
+  pkgs = import sources.nixpkgs { };
+
   mac-cleanup = pkgs.stdenv.mkDerivation {
     name = "mac-cleanup";
     version = "1.0";
@@ -60,6 +62,7 @@ in
     jq
     coreutils
     git
+    lorri
 
     nodejs
     go
@@ -243,5 +246,10 @@ in
     '';
   };
 
+  programs.direnv = {
+    enable = true;
+    enableNixDirenvIntegration = true;
+    enableZshIntegration = true;
+  };
 
 }
