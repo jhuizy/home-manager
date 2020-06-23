@@ -1,5 +1,23 @@
 { config, pkgs, ... }:
 let
+  mac-cleanup = pkgs.stdenv.mkDerivation {
+    name = "mac-cleanup";
+    version = "1.0";
+    src = pkgs.fetchFromGitHub {
+      owner = "fwartner";
+      repo = "mac-cleanup";
+      rev = "1b08c31f268cab08e53886f5fdcdb503563c4430";
+      sha256 = "1hmcj5jg1m7p67zf2rvj1rmm7hwwp8x6389yn07fv0v1z871bada";
+    };
+
+    doCheck = false;
+
+    installPhase = ''
+      mkdir -p $out/bin
+      cp cleanup.sh $out/bin/mac-cleanup
+    '';
+  };
+
   assume-role = pkgs.buildGoPackage rec {
     name = "assume-role";
     goPackagePath = "main";
@@ -10,7 +28,7 @@ let
       sha256 = "1yd4c8d09sgrz5bqxpqxl9xhgar92rd54yxqlx48qyvl381nkzrr";
     };
     postInstall = ''
-      ln -s $out/bin/main $out/bin/assume-role
+      mv $out/bin/main $out/bin/assume-role
     '';
   };
   extraNodePackages = import ./node/default.nix { };
@@ -48,6 +66,8 @@ in
     gitAndTools.gh
     assume-role
     extraNodePackages.aws-azure-login
+    tree
+    mac-cleanup
   ];
 
   home.sessionVariables = {
@@ -87,6 +107,8 @@ in
       bindkey "^[[1;5C" forward-word
       bindkey "^[[1;5D" backward-word
 
+      source ~/.nix-profile/etc/profile.d/nix.sh
+
       source ${pkgs.zsh-fast-syntax-highlighting}/share/zsh/site-functions/fast-syntax-highlighting.plugin.zsh
 
     '';
@@ -111,6 +133,8 @@ in
   programs.tmux = {
     enable = true;
     keyMode = "vi";
+
+    sensibleOnTop = false;
 
     # Work-around for a lack of XDG_RUNTIME_DIR 
     # See https://github.com/rycee/home-manager/issues/1270
@@ -218,5 +242,6 @@ in
       set shiftwidth=2
     '';
   };
+
 
 }
