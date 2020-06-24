@@ -71,6 +71,8 @@ in
     extraNodePackages.aws-azure-login
     tree
     mac-cleanup
+    entr
+    watch
   ];
 
   home.sessionVariables = {
