@@ -73,6 +73,7 @@ in
     mac-cleanup
     entr
     watch
+    bat
   ];
 
   home.sessionVariables = {
@@ -106,6 +107,7 @@ in
       git-tmux = "tmux new -s $(basename $(pwd))";
       gi = "function gi() { curl -sLw \"\n\" https://www.gitignore.io/api/$@ ;}";
       gp = "git push";
+      clear-aws-vars = "unset $(printenv | grep AWS | sed 's/\\(.*\\)=\\(.*\\)/\\1/g')";
     };
     initExtra = ''
       bindkey '^R' history-incremental-search-backward
