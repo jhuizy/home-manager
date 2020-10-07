@@ -42,7 +42,7 @@ in
 
   # Home Manager needs a bit of information about you and the
   # paths it should manage.
-  home.username      = "jordan";
+  home.username = "jordan";
   home.homeDirectory = if pkgs.stdenv.hostPlatform.isDarwin then "/Users/jordan" else "/home/jordan";
 
   # This value determines the Home Manager release that your
@@ -77,24 +77,33 @@ in
     kak-lsp
     (kakoune.override {
       configure = {
-        plugins = [  ];
+        plugins = [ ];
       };
     })
   ];
 
   home.file.".config/kak/kakrc".text = ''
-    eval %sh{kak-lsp --kakoune -s $kak_session}
+    eval %sh{kak-lsp --kakoune -s $kak_session --config $HOME/.config/kak-lsp/kak-lsp.toml}
+    set-option global lsp_cmd "kak-lsp -s %val{session} -vvv --log /tmp/kak-lsp.log"
     lsp-enable
 
-    indentwidth 2
+    set-option global indentwidth 2
     map global insert <tab> '<a-;><gt>'
     map global insert <s-tab> '<a-;><lt>'
+    map global normal '<;>' '<:>'
 
   '';
 
+  home.file."Library/Preferences/kak-lsp/kak-lsp.toml".text = ''
+    [language.haskell]
+    filetypes = ["haskell"]
+    roots = ["hie.yaml"]
+    command = "ghcide"
+  '';
   home.sessionVariables = {
     XDG_RUNTIME_DIR = "$HOME/.run";
     XDG_CACHE_DIR = "$HOME/.cache";
+    XDG_CONFIG_HOME = "$HOME/.config";
   };
 
   programs.git = {
