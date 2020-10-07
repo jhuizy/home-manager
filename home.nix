@@ -42,7 +42,7 @@ in
 
   # Home Manager needs a bit of information about you and the
   # paths it should manage.
-  home.username = "jordan";
+  home.username      = "jordan";
   home.homeDirectory = if pkgs.stdenv.hostPlatform.isDarwin then "/Users/jordan" else "/home/jordan";
 
   # This value determines the Home Manager release that your
@@ -61,7 +61,6 @@ in
     awscli
     jq
     coreutils
-    git
     lorri
 
     nodejs
@@ -74,7 +73,24 @@ in
     entr
     watch
     bat
+    xsv
+    kak-lsp
+    (kakoune.override {
+      configure = {
+        plugins = [  ];
+      };
+    })
   ];
+
+  home.file.".config/kak/kakrc".text = ''
+    eval %sh{kak-lsp --kakoune -s $kak_session}
+    lsp-enable
+
+    indentwidth 2
+    map global insert <tab> '<a-;><gt>'
+    map global insert <s-tab> '<a-;><lt>'
+
+  '';
 
   home.sessionVariables = {
     XDG_RUNTIME_DIR = "$HOME/.run";
@@ -173,6 +189,8 @@ in
       bind-key -n C-_ resize-pane -D 10
       bind-key -n C-= resize-pane -U 10
 
+      set -sg escape-time 25
+
       # Allows me to use mouse
       set -g mouse on
     '';
@@ -189,6 +207,7 @@ in
       vim-commentary
       vim-surround
       vim-snipmate
+      vim-lsp
     ];
     settings = { ignorecase = true; };
     extraConfig = ''
