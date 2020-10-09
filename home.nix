@@ -132,6 +132,7 @@ in
       git-tmux = "tmux new -s $(basename $(pwd))";
       gi = "function gi() { curl -sLw \"\n\" https://www.gitignore.io/api/$@ ;}";
       gp = "git push";
+      gpu = "git push -u origin $(git_current_branch)";
       clear-aws-vars = "unset $(printenv | grep AWS | sed 's/\\(.*\\)=\\(.*\\)/\\1/g')";
       json2csv = "function() { cat $1 | jq -r '(.[0] | keys_unsorted) as $keys | $keys, map([.[ $keys[] ]])[] | @csv' }";
     };
